@@ -47,9 +47,10 @@ export const VISION = {
 
 // In-game clock: 1 real second = CLOCK.scale game seconds.
 export const CLOCK = {
-  start: 9 * 3600 + 7 * 60,   // 09:07 — class started at 9:00, you're leaving Gare d'Austerlitz
-  deadline: 9 * 3600 + 30 * 60, // 09:30 — Edusign closes for room 1.11
-  scale: 6,
+  start: 8 * 3600 + 52 * 60,    // 08:52 — leaving Gare d'Austerlitz, already running late
+  classAt: 9 * 3600,            // 09:00 — class starts in room 1.11
+  deadline: 9 * 3600 + 5 * 60,  // 09:05 — Edusign only stays open 5 minutes after the start
+  scale: 3,                     // 1 real second = 3 game seconds → ~4½ minutes to make it
 };
 
 // Palette — muted, warm, slightly Parisian. Everything procedural uses these.

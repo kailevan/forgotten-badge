@@ -3,6 +3,7 @@
 //  at any screen size (phones included). Styles: css/hud.css
 // ─────────────────────────────────────────────────────────────
 import { Input } from '../systems/input.js';
+import { CLOCK } from '../config.js';
 
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -39,7 +40,8 @@ export const HUD = {
     const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
     if (!changed('clock', h * 60 + m)) return;
     $('clock').textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    $('clock').classList.toggle('is-late', sec >= 9 * 3600 + 30 * 60);
+    $('clock').classList.toggle('is-warn', sec >= CLOCK.classAt && sec < CLOCK.deadline);
+    $('clock').classList.toggle('is-late', sec >= CLOCK.deadline);
   },
   // the hints panel, top right: { title, items: [{ text, done, active, key }] } or null.
   // Folded to a small tab by default; opens for a few seconds when its content changes.

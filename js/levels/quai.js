@@ -265,10 +265,10 @@ export default {
   async intro(L) {
     const p = L.player, c = (pr) => L.cw(pr), sp = 104;
     L.cameras.main.startFollow(p, true, 0.1, 0.1);
-    HUD.caption('<b>09:07</b> · Gare d’Austerlitz · class started at <b>9:00</b>', 3200);
+    HUD.caption('<b>08:52</b> · Gare d’Austerlitz · class starts at <b>9:00</b>', 3200);
     await c(p.walkTo(...xy(12, 49), sp));
     await c(p.walkTo(...xy(32, 49), sp));
-    HUD.caption('Room <b>1.11</b>. Edusign closes at <b>9:30</b>.', 2600);
+    HUD.caption('Room <b>1.11</b>. Edusign closes at <b>9:05</b> — no later.', 2600);
     await c(p.walkTo(...xy(32, 41), sp));
     await c(p.walkTo(...xy(46, 39), sp));
     p.face(0); p.animate(false);
@@ -300,7 +300,7 @@ export default {
       return HUD.phone({ thread: [['me', 'Inès I forgot my badge. Can you bring me yours… or anyone’s?'], ['them', 'omg AGAIN?? ok coming down. meet me outside'], ['them', 'and NOT in front of security']], choices: [{ label: 'ok ok' }] });
     }
     HUD.phone({
-      thread: [['them', 'where r u?? he’s already taking attendance'], ['them', 'edusign closes at 9:30']],
+      thread: [['them', 'where r u?? class starts at 9'], ['them', 'edusign closes at 9:05 dont miss it']],
       choices: [
         { label: 'Inès I forgot my badge. Can you bring me yours… or anyone’s?', id: 'ask' },
         { label: '2 min, on my way!', id: 'no' },

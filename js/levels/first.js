@@ -17,6 +17,7 @@ import { grid } from './grid.js';
 import { tilePt } from '../entities/actors.js';
 import { HUD } from '../ui/hud.js';
 import { LOOKS } from '../art/characters.js';
+import { CLOCK } from '../config.js';
 
 const W = 128, H = 34;
 const g = grid(W, H, '#');
@@ -170,7 +171,7 @@ export default {
     { text: 'Glass walls: hide behind coat racks or walk with other students' },
     { text: 'In 1.11, sit next to Inès while the prof faces the screen' },
   ] }),
-  onPlay(L) { L.objective('Get into 1.11 and sit next to Inès — unseen'); },
+  onPlay(L) { L.objective('Sit next to Inès in 1.11 — Edusign closes at 9:05'); },
   phone(L) {
     if (L.seated) return edusign(L);
     HUD.toast('Inès: “1.11, the very end. Monsieur is in the corridor, careful.”');
@@ -181,7 +182,7 @@ export default {
 };
 
 const hhmm = (sec) => `${String(Math.floor(sec / 3600)).padStart(2, '0')}:${String(Math.floor((sec % 3600) / 60)).padStart(2, '0')}`;
-const LATE_AT = 9 * 3600 + 30 * 60;
+const LATE_AT = CLOCK.deadline;   // Edusign closes 5 minutes after the start of class
 
 // You made it to the seat next to Inès. Now: phone out, Edusign.
 async function sitDown(L) {
@@ -190,7 +191,7 @@ async function sitDown(L) {
   L.watchers.forEach((w) => { w.alert = 0; w.setBubble(null); });
   L.watchers = [];                                    // seated among the class: nobody's looking for you any more
   L.player.face(3); L.player.animate(false);
-  await HUD.say('Inès', '(whispering) You made it!! Quick — sign Edusign before it closes.', { auto: 1400 });
+  await HUD.say('Inès', '(whispering) You made it!! Quick — Edusign closes 5 min after the start.', { auto: 1400 });
   const touch = document.body.classList.contains('is-touch');
   L.objective(touch ? 'Tap the phone button — sign Edusign' : 'Press P — pull out your phone and sign Edusign');
   HUD.toast(touch ? 'Phone out → Edusign' : 'P — phone out → Edusign', 3000);
@@ -201,8 +202,8 @@ function edusign(L) {
   HUD.phone({
     title: 'Edusign', app: 'edusign',
     thread: late
-      ? [['them', 'Salle 1.11 · Cours de 09:00'], ['them', `Signature closed at 09:30 — it’s ${time}.`], ['them', 'Status: ABSENT']]
-      : [['them', 'Salle 1.11 · Cours de 09:00'], ['them', `Signature open until 09:30 — it’s ${time}.`]],
+      ? [['them', 'Salle 1.11 · Cours de 09:00'], ['them', `Signature closed at 09:05 — it’s ${time}.`], ['them', 'Status: ABSENT']]
+      : [['them', 'Salle 1.11 · Cours de 09:00'], ['them', `Signature open until 09:05 — it’s ${time}.`]],
     choices: late ? [{ label: '…ugh. Close the app', id: 'late' }] : [{ label: '✍  Sign — present', id: 'sign' }],
     onPick: () => finish(L, clock, late),
   });
@@ -216,19 +217,19 @@ async function finish(L, clock, late) {
   L.sfx('beep');
   HUD.toast(late ? `EDUSIGN ✗  ABSENT — ${time}` : `EDUSIGN ✓  Présent·e — ${time}`, 2400);
   await new Promise((r) => setTimeout(r, 1200));
-  // consequences: every catch costs you, lateness costs more, after 9:30 you're marked absent
-  const minsLate = Math.max(0, Math.floor((clock - (9 * 3600)) / 60));
-  let grade = 20 - caught * 3 - Math.floor(minsLate / 5);
+  // consequences: every catch costs 3, every minute after 9:00 costs 1, after 9:05 you're marked absent
+  const minsLate = Math.max(0, Math.floor((clock - CLOCK.classAt) / 60));
+  let grade = 20 - caught * 3 - minsLate;
   let consequence;
   if (late) {
     grade = Math.min(grade, 6);
-    consequence = 'Marked absent. The prof wants a word after class.';
+    consequence = 'Edusign closed at 09:05 — marked absent. The prof wants a word after class.';
     await HUD.talk([['Prof', 'Edusign is closed. You’re marked absent — see me after class.'], ['You', '(…worth it?)']]);
-  } else if (minsLate > 15) {
-    consequence = `${minsLate} minutes late — signed, but the prof noticed.`;
+  } else if (minsLate > 0) {
+    consequence = `${minsLate} min late — signed with seconds to spare, and the prof noticed.`;
     await HUD.talk([['Prof', '(without turning around) Nice of you to join us.'], ['Inès', '(whispering) …she saw.']]);
   } else {
-    consequence = 'Signed in. Nobody suspects a thing.';
+    consequence = 'In before 9:00. Nobody suspects a thing.';
     await HUD.talk([['Inès', '(whispering) …how did you even get in?'], ['You', '(whispering) Don’t ask.']]);
   }
   grade = Math.max(0, Math.min(20, grade));

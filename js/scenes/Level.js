@@ -218,7 +218,7 @@ export class Level extends Phaser.Scene {
   }
   student(opts) {
     const seed = opts.seed ?? ((Math.random() * 1e6) | 0);
-    return this.npc({ key: `stu-${seed % 40}`, look: studentLook(seed % 40), role: 'student', speed: 34 + (seed % 9), ...opts });
+    return this.npc({ key: `stu-${seed % 160}`, look: studentLook(seed % 160), role: 'student', speed: 34 + (seed % 9), ...opts });
   }
   // Removal is deferred to the end of the frame: an NPC often removes
   // itself from inside its own step() (route finished) — destroying it

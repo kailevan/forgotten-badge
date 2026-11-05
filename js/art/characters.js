@@ -60,24 +60,53 @@ export function drawChar(c, L, dir, f) {
   const botD = shade(L.bottom, -0.2);
   const y0 = bob;
 
-  // legs + shoes
+  // legs + shoes (wide-leg trousers, or a dress)
   const legL = dir === 2 ? [6, 8] : [5, 9];
   const lift = (f === 1) ? [1, 0] : (f === 2) ? [0, 1] : [0, 0];
-  for (let k = 0; k < 2; k++) {
-    const lx = dir === 2 ? (k === 0 ? 6 : 8) : legL[k];
-    const h = 4 - lift[k];
-    px(c, k === 0 ? L.bottom : botD, lx, 18, 2, h);
-    px(c, L.shoes, lx, 18 + h, 2, 1);
-    if (dir === 2) px(c, L.shoes, lx - 1, 18 + h, 1, 1);
+  if (L.dress) {
+    const dD = shade(L.dress, -0.22);
+    const sx = dir === 2 ? 4 : 3, sw = dir === 2 ? 8 : 10;
+    for (let k = 0; k < 2; k++) {                      // legs under the hem
+      const lx = dir === 2 ? (k === 0 ? 6 : 8) : legL[k];
+      px(c, L.tights || shade(L.skin, -0.1), lx, 20 - lift[k], 2, 2);
+      px(c, L.shoes, lx, 22 - lift[k], 2, 1);
+    }
+    px(c, L.dress, sx + 1, 15 + y0, sw - 2, 2); px(c, L.dress, sx, 17 + y0, sw, 3 - y0);
+    px(c, dD, sx, 19, sw, 1);
+    if (dir === 0) px(c, dD, 7, 16 + y0, 1, 3);       // a fold
+  } else {
+    for (let k = 0; k < 2; k++) {
+      const lx = dir === 2 ? (k === 0 ? 6 : 8) : legL[k];
+      const h = 4 - lift[k];
+      if (L.baggy) {                                   // wide-leg / baggy
+        const bx = dir === 2 ? (k === 0 ? 5 : 8) : (k === 0 ? 4 : 8);
+        px(c, k === 0 ? L.bottom : botD, bx, 17, dir === 2 ? 3 : 4, h + 1);
+        px(c, L.shoes, bx, 18 + h, dir === 2 ? 3 : 4, 1);
+      } else {
+        px(c, k === 0 ? L.bottom : botD, lx, 18, 2, h);
+        px(c, L.shoes, lx, 18 + h, 2, 1);
+        if (dir === 2) px(c, L.shoes, lx - 1, 18 + h, 1, 1);
+      }
+    }
   }
   if (L.highWaist) px(c, L.bottom, dir === 2 ? 5 : 4, 15 + y0, dir === 2 ? 6 : 8, 3);
 
-  // torso
-  const tx = dir === 2 ? 5 : 4, tw = dir === 2 ? 6 : 8;
-  px(c, L.top, tx, 10 + y0, tw, 8);
-  px(c, topD, tx, 16 + y0, tw, 2);
+  // torso (oversized when baggy)
+  const big = L.baggy && !L.coat;
+  const tx = dir === 2 ? 5 : big ? 3 : 4, tw = dir === 2 ? 6 : big ? 10 : 8;
+  const topC = L.dress || L.top;
+  px(c, topC, tx, 10 + y0, tw, big ? 9 : 8);
+  px(c, L.dress ? shade(L.dress, -0.22) : topD, tx, (big ? 17 : 16) + y0, tw, 2);
   if (L.highWaist) { px(c, L.bottom, tx, 15 + y0, tw, 3); px(c, shade(L.bottom, -0.35), tx, 15 + y0, tw, 1); }
-  if (L.coat) { px(c, L.coat, tx, 10 + y0, tw, 9); if (dir === 0) px(c, L.top, 7, 10 + y0, 2, 7); }
+  if (L.coat) {
+    const long = L.longCoat ? 12 : 9;                  // long coats reach the knees
+    px(c, L.coat, tx, 10 + y0, tw, long);
+    px(c, shade(L.coat, -0.2), tx, 10 + y0 + long - 1, tw, 1);
+    if (dir === 0) {
+      px(c, topC, 7, 10 + y0, 2, L.longCoat ? 6 : 7);  // what's underneath, down the front
+      if (L.lapels) { px(c, shade(L.coat, -0.3), 6, 10 + y0, 1, 4); px(c, shade(L.coat, -0.3), 9, 10 + y0, 1, 4); if (L.tie) px(c, L.tie, 7, 11 + y0, 2, 3); }
+    }
+  }
   if (L.bag && dir !== 1) px(c, L.bag, dir === 2 ? 9 : 11, 13 + y0, 3, 4);
 
   // arms (swing)
@@ -136,10 +165,12 @@ export function drawChar(c, L, dir, f) {
   if (dir === 0) {
     px(c, L.ink || PAL.ink, hx + 2, 5 + y0); px(c, L.ink || PAL.ink, hx + 5, 5 + y0);
     if (L.glasses) { px(c, PAL.ink, hx + 1, 4 + y0, 3, 1); px(c, PAL.ink, hx + 4, 4 + y0, 3, 1); px(c, PAL.ink, hx + 1, 5 + y0); px(c, PAL.ink, hx + 6, 5 + y0); }
+    if (L.shades) { px(c, '#0d0d10', hx + 1, 4 + y0, 6, 2); px(c, '#3a3a44', hx + 2, 4 + y0, 1, 1); }
     px(c, skinD, hx + 3, 7 + y0, 2, 1);
   } else if (dir === 2) {
     px(c, PAL.ink, hx + 1, 5 + y0);
     if (L.glasses) px(c, PAL.ink, hx, 4 + y0, 4, 1);
+    if (L.shades) px(c, '#0d0d10', hx, 4 + y0, 3, 2);
   }
 }
 
@@ -168,21 +199,39 @@ export const LOOKS = {
   smoker:   { skin: '#d9a582', hair: '#6b4b32', hairStyle: 'ponytail', top: '#8a8f99', bottom: '#2b2b33', shoes: '#1b1b20' },
 };
 
-const STUDENT_PARTS = {
-  skin: ['#f1c9a5', '#e2b08c', '#c98e68', '#a86d4a', '#7c4c33', '#f6d7bf'],
-  hair: ['#121014', '#3a2a22', '#6b4b32', '#c79a5b', '#e6d3a6', '#8a2c2c', '#2b2b2b'],
-  hairStyle: ['short', 'long', 'curly', 'ponytail', 'short', 'long'],
-  top: ['#e9e4d8', '#1e1e24', '#8a2c2c', '#c9b28a', '#3b4a6b', '#6d7a5a', '#d9d3c4', '#b06c8c'],
-  coat: [null, null, '#2c2a33', '#7a5a3a', '#cfc6b4', '#1e1e24'],
-  bottom: ['#1e1e24', '#2b2b33', '#4f6f9e', '#c9b28a', '#5c5a66', '#e9e4d8'],
-  shoes: ['#f4f1ea', '#121014', '#7a5a3a'],
-  bag: [null, '#1e1e24', '#c9b28a', '#e9e4d8', null],
-};
+// IFM students dress the part: extravagant, a lot of black — suits, baggy cuts,
+// dresses, long coats, the odd statement piece. Each student = one archetype.
+const SKIN = ['#f6d7bf', '#f1c9a5', '#e2b08c', '#d9a582', '#c98e68', '#a86d4a', '#7c4c33', '#5a3825'];
+const HAIR = ['#121014', '#121014', '#2b2b2b', '#3a2a22', '#6b4b32', '#c79a5b', '#e6d3a6', '#b9b6b2', '#8a2c2c', '#f4f1ea'];
+const STYLES = ['short', 'long', 'curly', 'ponytail', 'clip', 'buzz', 'dreads', 'long', 'short'];
+const BLACK = '#141418', INK2 = '#1e1e24', CHAR = '#2b2b33', CREAM = '#e9e4d8', WHITE = '#f4f1ea';
+const OUTFITS = [
+  // all black — the most common
+  (p) => ({ top: BLACK, bottom: BLACK, shoes: p([BLACK, WHITE]), coat: p([null, INK2, BLACK]), longCoat: p([true, false]), bag: p([null, BLACK, '#8a2c2c']) }),
+  (p) => ({ top: p([BLACK, CHAR]), bottom: BLACK, shoes: BLACK, coat: BLACK, longCoat: true, shades: p([true, false, false]) }),
+  // suits
+  (p) => { const s = p([BLACK, CHAR, CREAM, '#2f3b5c', '#c9b28a']); return { coat: s, bottom: s, top: p([WHITE, BLACK]), lapels: true, tie: p([null, null, BLACK, '#8a2c2c']), shoes: p([BLACK, WHITE]) }; },
+  // baggy / oversized
+  (p) => ({ baggy: true, top: p([BLACK, CHAR, CREAM, '#5c5a66', '#6d7a5a']), bottom: p([BLACK, '#4f6f9e', '#2f3b5c', '#c9b28a', CHAR]), shoes: p([WHITE, BLACK, '#c94f3d']), bag: p([null, BLACK, CREAM]) }),
+  (p) => ({ baggy: true, top: BLACK, bottom: BLACK, shoes: p([WHITE, BLACK]), shades: p([true, false]) }),
+  // dresses
+  (p) => ({ dress: p([BLACK, BLACK, '#8a2c2c', CREAM, '#c9ced3', '#2f3b5c']), coat: p([null, null, BLACK, '#7a5a3a']), shoes: BLACK, tights: p([null, BLACK]), bag: p([null, BLACK, '#c9b28a']) }),
+  // statement pieces
+  (p) => ({ top: BLACK, bottom: BLACK, coat: p(['#d6332e', '#8a2c2c', '#6f8c2a', '#c9b28a', '#b06c8c']), longCoat: true, shoes: BLACK }),
+  (p) => ({ top: p([WHITE, CREAM]), bottom: p(['#4f6f9e', BLACK]), coat: p(['#3a2a22', BLACK]), shoes: p([BLACK, '#7a5a3a']), shades: p([true, false]) }),
+];
+const WEIGHTS = [3, 2, 2, 2, 1, 2, 1, 1];   // black-heavy on purpose
 
 export function studentLook(seed) {
-  const pick = (arr, k) => arr[(hash(seed, k) * arr.length) | 0];
-  const L = {};
-  Object.keys(STUDENT_PARTS).forEach((k, i) => { const v = pick(STUDENT_PARTS[k], i + 3); if (v) L[k] = v; });
+  let k = 0;
+  const p = (arr) => arr[(hash(seed, ++k + 7) * arr.length) | 0];
+  const total = WEIGHTS.reduce((a, b) => a + b, 0);
+  let r = hash(seed, 1) * total, i = 0;
+  while (r >= WEIGHTS[i]) { r -= WEIGHTS[i]; i++; }
+  const L = { skin: p(SKIN), hair: p(HAIR), hairStyle: p(STYLES), ...OUTFITS[i](p) };
+  Object.keys(L).forEach((key) => { if (L[key] === null || L[key] === false) delete L[key]; });
+  if (!L.top) L.top = L.dress || BLACK;
+  if (!L.bottom) L.bottom = BLACK;
   return L;
 }
 
