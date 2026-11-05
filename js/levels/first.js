@@ -191,7 +191,7 @@ async function sitDown(L) {
   L.watchers.forEach((w) => { w.alert = 0; w.setBubble(null); });
   L.watchers = [];                                    // seated among the class: nobody's looking for you any more
   L.player.face(3); L.player.animate(false);
-  await HUD.say('Inès', '(whispering) You made it!! Quick — Edusign closes 5 min after the start.', { auto: 1400 });
+  await HUD.say('Inès', '(whispering) You made it!! Quick — Edusign closes 5 min after the start.');
   const touch = document.body.classList.contains('is-touch');
   L.objective(touch ? 'Tap the phone button — sign Edusign' : 'Press P — pull out your phone and sign Edusign');
   HUD.toast(touch ? 'Phone out → Edusign' : 'P — phone out → Edusign', 3000);

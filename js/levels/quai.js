@@ -261,7 +261,7 @@ export default {
     for (const n of L.smokers) if (n.active && !n.dead && Math.random() < dt * 0.55) puff(L, n);
   },
 
-  // ~10 s, skippable. Lines advance by themselves — nothing waits on a key.
+  // ~10 s, skippable. Dialogue boxes wait for E / click / tap (the box shows the key).
   async intro(L) {
     const p = L.player, c = (pr) => L.cw(pr), sp = 104;
     L.cameras.main.startFollow(p, true, 0.1, 0.1);
@@ -272,10 +272,10 @@ export default {
     await c(p.walkTo(...xy(32, 41), sp));
     await c(p.walkTo(...xy(46, 39), sp));
     p.face(0); p.animate(false);
-    await c(HUD.say('You', 'Late again. Coffee, phone, badge…  …badge?', { auto: 900 }));
+    await c(HUD.say('You', 'Late again. Coffee, phone, badge…  …badge?'));
     p.sprite.setTint(0xffd0d0); L.cameras.main.shake(140, 0.003);
     await c(wait(220)); p.sprite.clearTint();
-    await c(HUD.say('You', 'It’s at home. No badge, no gates. There has to be another way in.', { auto: 1300 }));
+    await c(HUD.say('You', 'It’s at home. No badge, no gates. There has to be another way in.'));
   },
   skipIntro(L) {
     const [x, y] = xy(46, 39);
