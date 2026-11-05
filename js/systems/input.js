@@ -16,7 +16,7 @@ export const Input = {
       const k = e.key.toLowerCase();
       if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
       if (!keys.has(k)) pressed.add(k);
-      if (k === 'h') document.getElementById('ways')?.classList.toggle('is-min');
+      if (k === 'h') window.__toggleWays?.();
       keys.add(k);
     });
     window.addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));

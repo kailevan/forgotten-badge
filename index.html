@@ -35,7 +35,7 @@
           <span id="badge-chip" class="chip">Badge</span>
           <span id="hidden-chip" class="chip">Hidden</span>
         </div>
-        <aside id="ways" onclick="this.classList.toggle('is-min')"><h4><span id="ways-title">Ways in</span><em class="only-desk">H</em></h4><ol id="ways-list"></ol></aside>
+        <aside id="ways" class="is-min" onclick="window.__toggleWays && window.__toggleWays()"><h4><span id="ways-title">Ways in</span><b id="ways-count"></b><em class="only-desk">H</em></h4><ol id="ways-list"></ol></aside>
         <div id="prompt"><span></span></div>
         <div id="toast"></div>
       </div>
@@ -121,6 +121,7 @@
   <script type="module">
     import { HUD } from './js/ui/hud.js';
     window.__advance = () => HUD.advance();
+    window.__toggleWays = () => HUD.toggleWays();
   </script>
   <script type="module" src="js/main.js"></script>
 </body>

@@ -161,6 +161,8 @@ export const LOOKS = {
   buzz:     { skin: '#e2b08c', hair: '#4a3a30', hairStyle: 'buzz', top: '#141418', turtleneck: true, bottom: '#4f6f9e', highWaist: true, shoes: '#1a1a1d' },
   allegria1:{ skin: '#c98e68', hair: '#121014', hairStyle: 'short', top: '#2f6b4f', coat: '#f4f1ea', bottom: '#1e1e24', shoes: '#121014' },
   allegria2:{ skin: '#8d5a3b', hair: '#2b2b2b', hairStyle: 'buzz', top: '#2f6b4f', coat: '#f4f1ea', bottom: '#2b2b33', shoes: '#121014' },
+  couture:  { skin: '#c98e68', hair: '#121014', hairStyle: 'long', top: '#1e1e24', coat: '#8a2c2c', bottom: '#1e1e24', shoes: '#121014', bag: '#c9b28a' },
+  prof:     { skin: '#e8b894', hair: '#5a4632', hairStyle: 'ponytail', glasses: true, top: '#e9e4d8', coat: '#2f3b5c', bottom: '#1e1e24', shoes: '#121014' },
   barista:  { skin: '#5a3825', hair: '#1a1414', hairStyle: 'dreads', top: '#2b2b33', coat: '#c9b28a', bottom: '#1e1e24', shoes: '#f4f1ea' },
   friend:   { skin: '#c98e68', hair: '#121014', hairStyle: 'long', top: '#d6332e', bottom: '#1e1e24', shoes: '#f4f1ea', bag: '#c9b28a' },
   smoker:   { skin: '#d9a582', hair: '#6b4b32', hairStyle: 'ponytail', top: '#8a8f99', bottom: '#2b2b33', shoes: '#1b1b20' },

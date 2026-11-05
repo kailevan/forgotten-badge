@@ -11,6 +11,7 @@ let typing = null;      // current typewriter
 let dialogueDone = null;
 const last = {};        // last value written per HUD field — only touch the DOM on change
 const changed = (k, v) => (last[k] === v ? false : ((last[k] = v), true));
+let waysTimer = null, waysPinned = null; // null = automatic, true/false = the player chose
 
 export const HUD = {
   dialogueOpen: false,
@@ -39,7 +40,9 @@ export const HUD = {
     $('clock').textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     $('clock').classList.toggle('is-late', sec >= 9 * 3600 + 30 * 60);
   },
-  // the "Ways in" panel, top right: { title, items: [{ text, done, key }] } or null
+  // the hints panel, top right: { title, items: [{ text, done, active, key }] } or null.
+  // Folded to a small tab by default; opens for a few seconds when its content changes.
+  // H / tap toggles it (and then it stays how you left it).
   setWays(w) {
     const sig = w ? w.title + '|' + w.items.map((it) => it.text + (it.done ? '1' : '0') + (it.active ? 'a' : '')).join('|') : '';
     if (!changed('ways', sig)) return;
@@ -47,7 +50,18 @@ export const HUD = {
     box.classList.toggle('is-on', !!w);
     if (!w) return;
     $('ways-title').textContent = w.title;
+    $('ways-count').textContent = w.items.filter((it) => !it.done).length;
     $('ways-list').innerHTML = w.items.map((it) => `<li class="${it.done ? 'is-done' : ''} ${it.active ? 'is-active' : ''}">${it.key ? `<kbd>${it.key}</kbd>` : ''}<span>${it.text}</span></li>`).join('');
+    if (waysPinned === null) {
+      box.classList.remove('is-min');
+      clearTimeout(waysTimer); waysTimer = setTimeout(() => { if (waysPinned === null) box.classList.add('is-min'); }, 6500);
+    }
+  },
+  toggleWays() {
+    const box = $('ways');
+    clearTimeout(waysTimer);
+    box.classList.toggle('is-min');
+    waysPinned = !box.classList.contains('is-min');
   },
   setBadge(on) { if (changed('badge', on)) $('badge-chip').classList.toggle('is-on', on); },
   setHidden(on) { if (changed('hidden', on)) $('hidden-chip').classList.toggle('is-on', on); },

@@ -110,17 +110,39 @@ export default {
   ],
 
   setup(L) {
-    // Monsieur — buzz cut, black turtleneck, high-waisted jeans. Fast and sharp.
-    L.npc({ key: 'buzz', look: LOOKS.buzz, role: 'teacher', name: 'Monsieur', mode: 'patrol', speed: 34, strict: true, watchMult: 1.5,
+    // Monsieur — buzz cut, black turtleneck, high-waisted jeans. Fast, sharp, owns the north corridor.
+    L.npc({ key: 'buzz', look: LOOKS.buzz, role: 'teacher', name: 'Monsieur', mode: 'patrol', speed: 38, strict: true, watchMult: 1.5,
       ...tilePt(68, 12), vision: { range: 130, fov: 1.2 },
-      points: [tilePt(68, 12, { wait: 1800, look: 3 }), tilePt(22, 12), tilePt(20, 12, { wait: 5400, look: 0, phone: true }), tilePt(68, 13, { wait: 1400, look: 3 })],
+      points: [tilePt(68, 12, { wait: 1200, look: 3 }), tilePt(40, 12, { wait: 900, look: 0 }), tilePt(20, 12, { wait: 2600, look: 2 }), tilePt(44, 13, { wait: 900, look: 1 }), tilePt(68, 13, { wait: 1200, look: 3 })],
       caughtLines: ['Shouldn’t you be in class? Where’s your badge?', 'Funny. Your badge says Camille.', 'Not today. Downstairs, reception.'] });
+    // the hall monitor walks the south corridor — the other way round isn't free either
+    L.npc({ key: 'guard', look: LOOKS.guard, role: 'guard', name: 'Surveillant', mode: 'patrol', speed: 26, strict: true, ...tilePt(64, 31),
+      vision: { range: 112, fov: 1.3 },
+      points: [tilePt(64, 31, { wait: 2000, look: 2 }), tilePt(24, 31, { wait: 2400, look: 3 }), tilePt(24, 30, { wait: 1200, look: 1 })],
+      caughtLines: ['Corridors aren’t for loitering. Badge?'] });
     // admin staff walking the cross corridor between the offices
     L.npc({ key: 'smoker', look: LOOKS.smoker, role: 'staff', name: 'Admin', mode: 'patrol', speed: 24, strict: true, ...tilePt(20, 15),
       vision: { range: 84, fov: 1.4 },
       points: [tilePt(20, 15, { wait: 1800, look: 0 }), tilePt(20, 25, { wait: 3200, look: 2 }), tilePt(20, 31, { wait: 1800, look: 3 }), tilePt(20, 25)],
       caughtLines: ['Can I help you? …Which class are you in?'] });
     L.cctv({ ...tilePt(73, 10), from: Math.PI * 0.72, to: Math.PI * 1.18, period: 9000, vision: { range: 120, fov: 0.7 } });
+    L.cctv({ ...tilePt(44, 11), from: Math.PI * 0.08, to: Math.PI * 0.92, period: 7000, vision: { range: 72, fov: 0.8 } });   // mid north corridor
+    // Madame Couture: in and out of 1.10, checking the corridor in front of 1.11 / 1.12
+    L.npc({ key: 'couture', look: LOOKS.couture, role: 'teacher', name: 'Madame Couture', mode: 'patrol', speed: 24, strict: true, ...tilePt(22, 7),
+      vision: { range: 100, fov: 1.5 },
+      points: [tilePt(22, 7, { wait: 4200, look: 3 }), tilePt(21, 9), tilePt(21, 12, { wait: 1200, look: 2 }), tilePt(13, 12, { wait: 2600, look: 2 }), tilePt(13, 13, { wait: 1400, look: 1 }), tilePt(21, 12, { wait: 1000, look: 3 }), tilePt(21, 9)],
+      caughtLines: ['You. Late, no badge, and in my corridor? Non.', 'Darling, the gates are downstairs. Badge, please.'] });
+    // your teacher in 1.11: at the projector (east wall), turning between the class and the screen
+    L.prof = L.npc({ key: 'prof', look: LOOKS.prof, role: 'teacher', name: 'Prof', ...tilePt(14, 6), dir: 2,
+      vision: { range: 130, fov: 1.6 }, strict: true, watchMult: 3, scan: [2, 3, 2, 3, 3], scanEvery: 2600, canChase: false,
+      caughtLines: ['Twenty minutes late… and no badge either? Reception, please.', 'Ah, there you are. Badge? …I thought so.'] });
+    // students drifting along the north corridor = moving cover
+    L.every(11000, () => {
+      for (let i = 0; i < 3; i++) {
+        const s = L.student({ seed: (Math.random() * 999) | 0, ...tilePt(73 + i, 12 + (i % 2)), speed: 30 + i * 3 });
+        s.route([tilePt(52 - i, 12 + (i % 2)), tilePt(31, 12), tilePt(31, 10), tilePt(30, 7)], (n) => L.remove(n));
+      }
+    }, 4000);
 
     // the atrium is busy: tables, sitting area, café queue
     [[88, 11], [92, 13], [96, 11], [77, 21], [78, 23], [80, 22], [103, 30], [105, 29], [86, 4], [90, 6], [97, 4], [74, 14]].forEach(([x, y], i) =>
@@ -134,15 +156,19 @@ export default {
     // your class in 1.11 (Inès made it up too)
     [[5, 5], [8, 4], [8, 7], [11, 5], [5, 8]].forEach(([x, y], i) => L.student({ seed: 70 + i, ...tilePt(x, y), dir: 3 }));
     L.npc({ key: 'friend', look: LOOKS.friend, role: 'friend', name: 'Inès', ...tilePt(11, 8), dir: 0 });
-    L.zone({ x: 12, y: 10, w: 1, h: 1, once: true, onEnter: (L) => win(L) });
+    // the win: get to the free seat next to Inès without the prof clocking you
+    L.zone({ x: 10, y: 6, w: 1, h: 2, once: true, onEnter: (L) => win(L) });
+    L.zone({ x: 12, y: 10, w: 1, h: 1, once: true, onEnter: () => HUD.toast('Wait until the prof turns to the screen — then slip in and sit next to Inès.', 3600) });
   },
 
-  ways: () => ({ title: 'Next', items: [
-    { text: 'Room 1.11 — far west end of the north corridor', active: true },
-    { text: 'Monsieur checks his phone at the far end — that’s your window' },
-    { text: 'Classrooms have glass walls — hide behind the coat racks' },
+  ways: () => ({ title: 'Tips', items: [
+    { text: 'Room 1.11 is at the far west end', active: true },
+    { text: 'Two ways there: north corridor (Monsieur + camera) or south (hall monitor + admin)' },
+    { text: 'Madame Couture keeps popping out of 1.10 — time it' },
+    { text: 'Glass walls: hide behind coat racks or walk with other students' },
+    { text: 'In 1.11, sit next to Inès while the prof faces the screen' },
   ] }),
-  onPlay(L) { L.objective('Room 1.11 — scan Edusign before 9:30'); },
+  onPlay(L) { L.objective('Get into 1.11 and sit next to Inès — unseen'); },
   phone() { HUD.toast('Inès: “1.11, the very end. Monsieur is in the corridor, careful.”'); },
 };
 
@@ -154,15 +180,14 @@ async function win(L) {
   const h = Math.floor(clock / 3600), m = Math.floor((clock % 3600) / 60);
   const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   const late = clock > 9 * 3600 + 30 * 60;
-  L.player.face(1); L.player.animate(false);
+  L.player.face(3); L.player.animate(false);
+  await new Promise((r) => setTimeout(r, 400));
   L.sfx('beep');
   HUD.toast(late ? `EDUSIGN — closed at 09:30 (it’s ${time})` : `EDUSIGN ✓  Présent·e — ${time}`, 2600);
-  await new Promise((r) => setTimeout(r, 900));
-  await L.player.walkTo(tilePt(10, 7).x, tilePt(10, 7).y, 40);
-  L.player.face(0); L.player.animate(false);
+  await new Promise((r) => setTimeout(r, 1200));
   await HUD.talk(late
     ? [['Inès', 'Edusign’s closed… but you’re here, that counts. Kind of.'], ['You', 'Never. Again. (until next week)']]
-    : [['Inès', 'You made it!! And Edusign’s still open.'], ['You', '…don’t ask how. What did I miss?']]);
+    : [['Inès', '(whispering) You made it!! Quick — Edusign’s still open.'], ['You', '(whispering) …don’t ask how. What did I miss?']]);
   HUD.letterbox(false);
   HUD.win({ time, late, caughtCount: L.registry.get('caught') });
 }
