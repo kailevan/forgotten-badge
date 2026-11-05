@@ -55,7 +55,8 @@ g.hline(23, 14, 49, '#'); g.hline(23, 29, 49, '#'); g.vline(23, 14, 16, '#');
 for (const y of [18, 22, 26]) [25, 28, 33, 36, 41, 44].forEach((x) => g.set(x, y, 'd'));
 g.rect(48, 15, 15, 8, 'V'); g.hline(48, 23, 15, '#'); g.vline(55, 24, 5, '#'); g.vline(63, 14, 16, '#');
 g.set(51, 29, 'D'); g.set(59, 29, 'D'); g.rect(50, 26, 3, 1, 'q'); g.rect(57, 26, 3, 1, 'q');
-g.set(67, 14, 'D'); g.set(67, 29, 'D');
+g.set(67, 14, 'D');
+g.rect(64, 29, 7, 1, 'w');                                   // Allegria stands in the open: no south wall onto the corridor
 // ALLEGRIA — lunch kiosk: counter ~30% up from the south wall, serving south; sinks + microwaves on the north wall
 g.rect(66, 25, 5, 1, '$');
 g.set(65, 15, 'a'); g.set(66, 15, 'a');                      // two sinks side by side
