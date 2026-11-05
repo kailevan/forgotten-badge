@@ -65,3 +65,23 @@
 .win-stats { display: flex; gap: 3cqw; font: 400 1.6cqw/1 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
 .win-stats b { color: var(--paper); }
 .win-sign { font: 400 1.3cqw/1 var(--font-ui); letter-spacing: .12em; color: var(--green); text-transform: uppercase; }
+#screen-win.is-late .win-kicker { background: var(--amber); color: var(--ink); }
+#screen-win.is-late h2 { color: var(--amber); }
+
+/* Character builder */
+#screen-builder { background: rgba(20, 19, 26, .92); }
+.builder { display: flex; gap: 4cqw; align-items: center; text-align: left; }
+.builder-left { display: grid; justify-items: center; gap: 1.4cqw; }
+.builder-kicker { font: 700 1.5cqw/1 var(--font-ui); letter-spacing: .14em; text-transform: uppercase; color: #ffd75e; }
+#builder-preview { width: 30cqw; height: 15cqw; image-rendering: pixelated; background: repeating-linear-gradient(90deg, #26252e 0 10cqw, #2d2c36 10cqw 20cqw); box-shadow: 0 0 0 var(--px) #3a3943; }
+.builder-right { display: grid; gap: 1.4cqw; }
+#builder-rows { list-style: none; display: grid; gap: .6cqw; }
+#builder-rows li { display: grid; grid-template-columns: 13cqw 3cqw 14cqw 3cqw; align-items: center; gap: .6cqw; padding: .5cqw .8cqw; background: #26252e; cursor: pointer; }
+#builder-rows li.is-sel { background: var(--paper); color: var(--ink); }
+#builder-rows .lab { font: 700 1.4cqw/1 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; }
+#builder-rows .val { display: flex; align-items: center; justify-content: center; gap: .6cqw; font: 600 1.6cqw/1 var(--font-text); }
+#builder-rows .val i { width: 2.4cqw; height: 2.4cqw; display: inline-block; box-shadow: 0 0 0 var(--px) var(--ink); }
+#builder-rows button { font: 700 1.5cqw/1 var(--font-ui); background: #3a3943; color: var(--paper); padding: .5cqw 0; }
+#builder-rows li.is-sel button { background: var(--ink); }
+.btn--ghost { background: transparent; color: var(--paper); box-shadow: 0 0 0 var(--px) #3a3943; }
+.builder-hint { font: 400 1.1cqw/1 var(--font-ui); letter-spacing: .08em; color: var(--mute); text-transform: uppercase; }

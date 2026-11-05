@@ -31,11 +31,12 @@
           <div id="objective"><span class="obj-dot"></span><span id="objective-text"></span></div>
         </div>
         <div class="hud-tr">
+          <button id="restart" class="hud-btn" title="Restart the game (R, twice)" onclick="window.__restart && window.__restart()">↺</button>
           <span id="clock">09:07</span>
           <span id="badge-chip" class="chip">Badge</span>
           <span id="hidden-chip" class="chip">Hidden</span>
         </div>
-        <aside id="ways" class="is-min" onclick="window.__toggleWays && window.__toggleWays()"><h4><span id="ways-title">Ways in</span><b id="ways-count"></b><em class="only-desk">H</em></h4><ol id="ways-list"></ol></aside>
+        <aside id="ways" class="is-min" onclick="window.__toggleWays && window.__toggleWays()"><h4><span id="ways-title">Ways in</span><b id="ways-count"></b><em class="only-desk">H</em></h4><ol id="ways-list"></ol><p id="ways-keys"></p></aside>
         <div id="prompt"><span></span></div>
         <div id="toast"></div>
       </div>
@@ -56,7 +57,7 @@
 
       <!-- ── Phone ── -->
       <div id="phone">
-        <div class="phone-top"><span>Inès</span><button id="phone-close" aria-label="Close">×</button></div>
+        <div class="phone-top"><span id="phone-title">Inès</span><button id="phone-close" aria-label="Close">×</button></div>
         <div id="phone-msgs"></div>
         <div id="phone-choices"></div>
       </div>
@@ -81,8 +82,24 @@
         </div>
         <p class="title-blurb">You’re late for class in <b>room&nbsp;1.11</b>. Edusign closes at <b>9:30</b>.<br>And your student badge? On your desk. At home.</p>
         <button id="title-start" class="btn btn--start">Press start</button>
-        <p class="title-controls only-desk">WASD / arrows move · Shift run · E act · P phone</p>
-        <p class="title-controls only-touch">Joystick move · RUN · A act · phone</p>
+        <p class="title-controls only-desk">WASD / arrows move · E act · P phone · H tips · R restart</p>
+        <p class="title-controls only-touch">Joystick move · A act · phone button</p>
+      </section>
+
+      <!-- ── Character builder ── -->
+      <section id="screen-builder" class="screen">
+        <div class="builder">
+          <div class="builder-left">
+            <span class="builder-kicker">Who forgot their badge?</span>
+            <canvas id="builder-preview" width="288" height="144"></canvas>
+            <button id="builder-random" class="btn btn--ghost">Shuffle</button>
+          </div>
+          <div class="builder-right">
+            <ul id="builder-rows"></ul>
+            <button id="builder-go" class="btn">Let’s go ▶</button>
+            <p class="builder-hint only-desk">↑ ↓ choose · ← → change · Enter go</p>
+          </div>
+        </div>
       </section>
 
       <!-- ── Caught ── -->
@@ -96,9 +113,9 @@
       <!-- ── Win ── -->
       <section id="screen-win" class="screen">
         <span class="win-kicker">Room 1.11</span>
-        <h2>You made it.</h2>
+        <h2 id="win-head">You made it.</h2>
         <p id="win-note"></p>
-        <div class="win-stats"><span>Arrived <b id="win-time"></b></span><span id="win-caught"></span></div>
+        <div class="win-stats"><span>Arrived <b id="win-time"></b></span><span id="win-caught"></span><span>Participation <b id="win-grade"></b></span></div>
         <p class="win-sign">Happy 40th, IFM · 1986 — 2026</p>
         <button id="win-again" class="btn">Play again</button>
       </section>
@@ -122,6 +139,7 @@
     import { HUD } from './js/ui/hud.js';
     window.__advance = () => HUD.advance();
     window.__toggleWays = () => HUD.toggleWays();
+    window.__restart = () => HUD.restart();
   </script>
   <script type="module" src="js/main.js"></script>
 </body>

@@ -130,7 +130,7 @@ export default {
     { key: 'houseboat', x: 128, y: 0.6 },
   ],
   spawn: { x: 10, y: 50, dir: 1 },
-  entries: { door: { x: 100, y: 39, dir: 1 }, retry: { x: 84, y: 39, dir: 3 }, lobby: { ...M(26, 14), dir: 2 } },
+  entries: { door: { x: 100, y: 39, dir: 1 }, retry: { x: 84, y: 39, dir: 3 }, lobby: { ...M(26, 14), dir: 2 }, fromFirst: { ...M(11, 10), dir: 2 } },
   retryEntry: 'retry',
   roofs: [
     // the covered gap: reveals as soon as you're on the pavement in front of it
@@ -178,7 +178,7 @@ export default {
     // security outside, by IFM's doors in the covered gap — relaxed, students hang out here
     // security outside: faces IFM's doors and checks who walks in. Takes phone breaks.
     L.doorGuard = L.npc({ key: 'guard', look: LOOKS.guard, role: 'guard', name: 'Security', ...P(34, 14), dir: 2,
-      vision: { range: 110, fov: 1.7 }, bump: 42, scan: [2, 2, 3, 2, 0, 2], scanEvery: 2400, canChase: false,
+      vision: { range: 110, fov: 1.7 }, bump: 42, scan: [2, 2, 3, 2, 0, 2], scanEvery: 2400,
       caughtLines: ['Hop hop hop — badge? No badge, no entry.', 'You think I didn’t see you run in? Badge.'] });
     L.every(15000, () => {                                     // the phone break = your window
       const gd = L.doorGuard; if (!gd || gd.dead || gd.alert) return;
@@ -238,7 +238,7 @@ export default {
   ways(L) {
     const f = L.flags, touch = document.body.classList.contains('is-touch');
     if (f.pastGates) return { title: 'Next', items: [{ text: 'Go round the stairs’ west end and climb east → 1st floor', active: true }] };
-    return { title: 'Ways in', items: [
+    return { title: 'Ways in', stay: !f.inside, items: [
       { text: 'Security checks the doors: go in with a crowd, or during his phone break', done: !!f.inside },
       { text: f.badge ? 'Inès got you a badge — walk through a gate' : 'Text Inès — she can bring you a badge', key: touch ? 'PHONE' : 'P', done: !!f.badge, active: !!f.texted && !f.badge },
       { text: 'Tailgate: a gate stays open 7 s after a student badges' },
@@ -289,7 +289,7 @@ export default {
     if (!f.hintPhone) {
       f.hintPhone = true;
       const touch = document.body.classList.contains('is-touch');
-      HUD.toast(touch ? 'Your options are top right. Tap the phone to text Inès.' : 'Your options are top right.  P — phone · Shift — run', 4200);
+      HUD.toast(touch ? 'Your ways in are top right. Tap the phone to text Inès.' : 'Your ways in are top right.  P — phone · E — talk', 4200);
     }
   },
 

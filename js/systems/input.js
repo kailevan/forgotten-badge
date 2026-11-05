@@ -17,6 +17,7 @@ export const Input = {
       if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
       if (!keys.has(k)) pressed.add(k);
       if (k === 'h') window.__toggleWays?.();
+      if (k === 'r' && !e.repeat) window.__restart?.();
       keys.add(k);
     });
     window.addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
@@ -35,7 +36,7 @@ export const Input = {
     if (m > 1) { x /= m; y /= m; }
     this.state.x = this.locked ? 0 : x;
     this.state.y = this.locked ? 0 : y;
-    this.state.run = !this.locked && (keys.has('shift') || this.touch.run);
+    this.state.run = false; // sprinting is disabled — you have to use a method, not your legs
   },
 
   // "act" = E / Space / Enter / the A button.  "phone" = P / Tab / phone button.

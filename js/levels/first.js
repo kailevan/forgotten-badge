@@ -89,7 +89,7 @@ export default {
   rows: g.rows(),
   spawn: { x: 100, y: 20, dir: 1 },
   entries: { stairs: { x: 100, y: 20, dir: 1 } },
-  exits: [{ x: 12, y: 10.6, w: 1, label: '★ 1.11 · EDUSIGN', icon: 'arrow-star', color: '#f4f1ea' }],
+  exits: [{ x: 12, y: 10.6, w: 1, label: '★ 1.11 · EDUSIGN', icon: 'arrow-star', color: '#f4f1ea' }, { x: 86, y: 17.4, w: 2, label: '▼ GROUND FLOOR', color: '#f4f1ea' }],
   labels: [
     ...ROOMS.map(([name, a]) => ({ x: a + 0.3, y: 3.15, text: name, color: '#f4f1ea', plate: name === '1.11' ? '#d6332e' : '#1b1a22' })),
     { x: 2.3, y: 11.2, text: '1.12', color: '#f4f1ea', plate: '#1b1a22' },
@@ -156,8 +156,10 @@ export default {
     // your class in 1.11 (Inès made it up too)
     [[5, 5], [8, 4], [8, 7], [11, 5], [5, 8]].forEach(([x, y], i) => L.student({ seed: 70 + i, ...tilePt(x, y), dir: 3 }));
     L.npc({ key: 'friend', look: LOOKS.friend, role: 'friend', name: 'Inès', ...tilePt(11, 8), dir: 0 });
+    // walk down the stair (its west end) → back to the ground floor
+    L.zone({ x: 86, y: 18, w: 2, h: 5, once: true, onEnter: (L) => L.goto('quai', 'fromFirst') });
     // the win: get to the free seat next to Inès without the prof clocking you
-    L.zone({ x: 10, y: 6, w: 1, h: 2, once: true, onEnter: (L) => win(L) });
+    L.zone({ x: 10, y: 6, w: 1, h: 2, once: true, onEnter: (L) => sitDown(L) });
     L.zone({ x: 12, y: 10, w: 1, h: 1, once: true, onEnter: () => HUD.toast('Wait until the prof turns to the screen — then slip in and sit next to Inès.', 3600) });
   },
 
@@ -169,25 +171,67 @@ export default {
     { text: 'In 1.11, sit next to Inès while the prof faces the screen' },
   ] }),
   onPlay(L) { L.objective('Get into 1.11 and sit next to Inès — unseen'); },
-  phone() { HUD.toast('Inès: “1.11, the very end. Monsieur is in the corridor, careful.”'); },
+  phone(L) {
+    if (L.seated) return edusign(L);
+    HUD.toast('Inès: “1.11, the very end. Monsieur is in the corridor, careful.”');
+  },
+  update(L) {
+    if (L.seated && !L.signed) { L.player.setPosition(L.seat.x, L.seat.y); L.player.body.reset(L.seat.x, L.seat.y); }
+  },
 };
 
-async function win(L) {
-  L.mode = 'over';
-  L.player.body.setVelocity(0, 0);
-  HUD.letterbox(true); HUD.show(false);
-  const clock = L.registry.get('clock');
-  const h = Math.floor(clock / 3600), m = Math.floor((clock % 3600) / 60);
-  const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-  const late = clock > 9 * 3600 + 30 * 60;
+const hhmm = (sec) => `${String(Math.floor(sec / 3600)).padStart(2, '0')}:${String(Math.floor((sec % 3600) / 60)).padStart(2, '0')}`;
+const LATE_AT = 9 * 3600 + 30 * 60;
+
+// You made it to the seat next to Inès. Now: phone out, Edusign.
+async function sitDown(L) {
+  L.seated = true;
+  L.seat = { ...tilePt(10, 7) };
+  L.watchers.forEach((w) => { w.alert = 0; w.setBubble(null); });
+  L.watchers = [];                                    // seated among the class: nobody's looking for you any more
   L.player.face(3); L.player.animate(false);
-  await new Promise((r) => setTimeout(r, 400));
+  await HUD.say('Inès', '(whispering) You made it!! Quick — sign Edusign before it closes.', { auto: 1400 });
+  const touch = document.body.classList.contains('is-touch');
+  L.objective(touch ? 'Tap the phone button — sign Edusign' : 'Press P — pull out your phone and sign Edusign');
+  HUD.toast(touch ? 'Phone out → Edusign' : 'P — phone out → Edusign', 3000);
+}
+
+function edusign(L) {
+  const clock = L.registry.get('clock'), time = hhmm(clock), late = clock > LATE_AT;
+  HUD.phone({
+    title: 'Edusign', app: 'edusign',
+    thread: late
+      ? [['them', 'Salle 1.11 · Cours de 09:00'], ['them', `Signature closed at 09:30 — it’s ${time}.`], ['them', 'Status: ABSENT']]
+      : [['them', 'Salle 1.11 · Cours de 09:00'], ['them', `Signature open until 09:30 — it’s ${time}.`]],
+    choices: late ? [{ label: '…ugh. Close the app', id: 'late' }] : [{ label: '✍  Sign — present', id: 'sign' }],
+    onPick: () => finish(L, clock, late),
+  });
+}
+
+async function finish(L, clock, late) {
+  L.signed = true;
+  L.mode = 'over';
+  HUD.letterbox(true); HUD.show(false);
+  const time = hhmm(clock), caught = L.registry.get('caught') || 0;
   L.sfx('beep');
-  HUD.toast(late ? `EDUSIGN — closed at 09:30 (it’s ${time})` : `EDUSIGN ✓  Présent·e — ${time}`, 2600);
+  HUD.toast(late ? `EDUSIGN ✗  ABSENT — ${time}` : `EDUSIGN ✓  Présent·e — ${time}`, 2400);
   await new Promise((r) => setTimeout(r, 1200));
-  await HUD.talk(late
-    ? [['Inès', 'Edusign’s closed… but you’re here, that counts. Kind of.'], ['You', 'Never. Again. (until next week)']]
-    : [['Inès', '(whispering) You made it!! Quick — Edusign’s still open.'], ['You', '(whispering) …don’t ask how. What did I miss?']]);
+  // consequences: every catch costs you, lateness costs more, after 9:30 you're marked absent
+  const minsLate = Math.max(0, Math.floor((clock - (9 * 3600)) / 60));
+  let grade = 20 - caught * 3 - Math.floor(minsLate / 5);
+  let consequence;
+  if (late) {
+    grade = Math.min(grade, 6);
+    consequence = 'Marked absent. The prof wants a word after class.';
+    await HUD.talk([['Prof', 'Edusign is closed. You’re marked absent — see me after class.'], ['You', '(…worth it?)']]);
+  } else if (minsLate > 15) {
+    consequence = `${minsLate} minutes late — signed, but the prof noticed.`;
+    await HUD.talk([['Prof', '(without turning around) Nice of you to join us.'], ['Inès', '(whispering) …she saw.']]);
+  } else {
+    consequence = 'Signed in. Nobody suspects a thing.';
+    await HUD.talk([['Inès', '(whispering) …how did you even get in?'], ['You', '(whispering) Don’t ask.']]);
+  }
+  grade = Math.max(0, Math.min(20, grade));
   HUD.letterbox(false);
-  HUD.win({ time, late, caughtCount: L.registry.get('caught') });
+  HUD.win({ time, late, caughtCount: caught, grade, consequence, headline: late ? 'In… but marked absent.' : grade >= 16 ? 'You made it.' : 'You made it. Just.' });
 }

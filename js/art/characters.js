@@ -52,7 +52,7 @@ export function outline(c, w, h, frameW = w, col = [27, 26, 34, 255]) {
   c.putImageData(img, 0, 0);
 }
 
-function drawChar(c, L, dir, f) {
+export function drawChar(c, L, dir, f) {
   const bob = f === 0 ? 0 : 1;
   const skinD = shade(L.skin, -0.18);
   const hairD = shade(L.hair, -0.25);
@@ -266,4 +266,27 @@ function bubble(c, bg, fg, dots) {
   px(c, bg, 1, 1, 7, 8);
   px(c, bg, 3, 10, 2, 1);
   dots.forEach(([x, y]) => px(c, fg, x, y));
+}
+
+// ── character builder options + preview ─────────────────────
+export const CUSTOM = [
+  ['Skin', 'skin', ['#f6d7bf', '#f1c9a5', '#e8b894', '#d9a582', '#c98e68', '#a86d4a', '#8d5a3b', '#5a3825']],
+  ['Hair', 'hairStyle', ['short', 'long', 'curly', 'ponytail', 'clip', 'buzz', 'dreads']],
+  ['Hair colour', 'hair', ['#121014', '#3a2a22', '#6b4b32', '#c79a5b', '#e6d3a6', '#b9b6b2', '#8a2c2c', '#d6332e']],
+  ['Top', 'top', ['#e9e4d8', '#1e1e24', '#8a2c2c', '#c9b28a', '#3b4a6b', '#6d7a5a', '#b06c8c', '#d6332e']],
+  ['Jacket', 'coat', [null, '#3b4a6b', '#1e1e24', '#7a5a3a', '#cfc6b4', '#2c2a33', '#6f8c2a']],
+  ['Trousers', 'bottom', ['#2b2b33', '#1e1e24', '#4f6f9e', '#c9b28a', '#e9e4d8', '#5c5a66', '#8a2c2c']],
+];
+const LABELS = { short: 'Short', long: 'Long', curly: 'Curly', ponytail: 'Ponytail', clip: 'Clipped up', buzz: 'Buzz cut', dreads: 'Locs' };
+export const customLabel = (key, v) => (key === 'hairStyle' ? LABELS[v] : v === null ? 'None' : '');
+
+export function paintPreview(canvas, look) {
+  const off = document.createElement('canvas'); off.width = CHAR_W * 3; off.height = CHAR_H;
+  const o = off.getContext('2d');
+  [0, 2, 1].forEach((dir, i) => { o.save(); o.translate(i * CHAR_W, 0); drawChar(o, look, dir, 0); o.restore(); });
+  outline(o, CHAR_W * 3, CHAR_H, CHAR_W);
+  const c = canvas.getContext('2d');
+  c.imageSmoothingEnabled = false;
+  c.clearRect(0, 0, canvas.width, canvas.height);
+  c.drawImage(off, 0, 0, off.width, off.height, 0, 0, canvas.width, canvas.height);
 }

@@ -6,6 +6,8 @@ import { Level } from './scenes/Level.js';
 import { Input } from './systems/input.js';
 import { HUD, waitForAct } from './ui/hud.js';
 import { LEVELS } from './levels/index.js';
+import { LOOKS } from './art/characters.js';
+import { buildCharacter } from './ui/builder.js';
 
 Input.init();
 
@@ -85,6 +87,10 @@ if (q.has('plan')) {
   await waitForAct('title-start');
   try { game.sound.context && game.sound.context.resume(); } catch (e) { /* no audio */ }
   HUD.screen('screen-title', false);
+  // a small character builder, then the intro with *your* character
+  const look = await buildCharacter();
+  for (const k of Object.keys(LOOKS.player)) delete LOOKS.player[k];
+  Object.assign(LOOKS.player, look, { spriteKey: `player-${Date.now()}` });   // a fresh sprite sheet — never swap one that's on screen
   const lvl = game.scene.getScene('Level');
   lvl.cameras.main.fadeOut(500, 20, 19, 26);
   setTimeout(() => lvl.scene.restart({ level: 'quai' }), 520);

@@ -11,6 +11,7 @@ let typing = null;      // current typewriter
 let dialogueDone = null;
 const last = {};        // last value written per HUD field — only touch the DOM on change
 const changed = (k, v) => (last[k] === v ? false : ((last[k] = v), true));
+let restartArmed = false, restartTimer = null;
 let waysTimer = null, waysPinned = null; // null = automatic, true/false = the player chose
 
 export const HUD = {
@@ -44,7 +45,7 @@ export const HUD = {
   // Folded to a small tab by default; opens for a few seconds when its content changes.
   // H / tap toggles it (and then it stays how you left it).
   setWays(w) {
-    const sig = w ? w.title + '|' + w.items.map((it) => it.text + (it.done ? '1' : '0') + (it.active ? 'a' : '')).join('|') : '';
+    const sig = w ? w.title + (w.stay ? '!' : '') + '|' + w.items.map((it) => it.text + (it.done ? '1' : '0') + (it.active ? 'a' : '')).join('|') : '';
     if (!changed('ways', sig)) return;
     const box = $('ways');
     box.classList.toggle('is-on', !!w);
@@ -52,9 +53,12 @@ export const HUD = {
     $('ways-title').textContent = w.title;
     $('ways-count').textContent = w.items.filter((it) => !it.done).length;
     $('ways-list').innerHTML = w.items.map((it) => `<li class="${it.done ? 'is-done' : ''} ${it.active ? 'is-active' : ''}">${it.key ? `<kbd>${it.key}</kbd>` : ''}<span>${it.text}</span></li>`).join('');
+    const touch = document.body.classList.contains('is-touch');
+    $('ways-keys').textContent = touch ? 'phone button · A = talk / act · tap to fold' : 'P = phone · E = talk / act · H = fold';
     if (waysPinned === null) {
       box.classList.remove('is-min');
-      clearTimeout(waysTimer); waysTimer = setTimeout(() => { if (waysPinned === null) box.classList.add('is-min'); }, 6500);
+      clearTimeout(waysTimer);
+      if (!w.stay) waysTimer = setTimeout(() => { if (waysPinned === null) box.classList.add('is-min'); }, 6500);
     }
   },
   toggleWays() {
@@ -62,6 +66,12 @@ export const HUD = {
     clearTimeout(waysTimer);
     box.classList.toggle('is-min');
     waysPinned = !box.classList.contains('is-min');
+  },
+  // restart the whole game — press twice (button or R) so it can't happen by accident
+  restart() {
+    if (restartArmed) { location.href = location.pathname; return; }
+    restartArmed = true; this.toast('Restart the whole game? Press again.', 2200);
+    clearTimeout(restartTimer); restartTimer = setTimeout(() => { restartArmed = false; }, 2400);
   },
   setBadge(on) { if (changed('badge', on)) $('badge-chip').classList.toggle('is-on', on); },
   setHidden(on) { if (changed('hidden', on)) $('hidden-chip').classList.toggle('is-on', on); },
@@ -139,8 +149,10 @@ export const HUD = {
   async talk(lines, opts) { for (const [n, t] of lines) await this.say(n, t, opts); },
 
   // ── phone ──
-  phone({ thread, choices, onPick }) {
+  phone({ thread, choices, onPick, title = 'Inès', app = '' }) {
     const el = $('phone');
+    $('phone-title').textContent = title;
+    el.dataset.app = app;
     this.phoneOpen = true; Input.locked = true;
     el.classList.add('is-on');
     const msgs = $('phone-msgs');
@@ -190,10 +202,13 @@ export const HUD = {
     this.screen('screen-caught', false);
     Input.locked = false;
   },
-  async win({ time, late, caughtCount }) {
+  async win({ time, late, caughtCount, grade, consequence, headline }) {
     $('win-time').textContent = time;
-    $('win-note').textContent = late ? 'Edusign closed — but you made it in.' : 'Signed in before Edusign closed. Nobody suspects a thing.';
+    $('win-head').textContent = headline || (late ? 'In… but late.' : 'You made it.');
+    $('win-note').textContent = consequence || (late ? 'Edusign closed — marked absent.' : 'Signed in before Edusign closed. Nobody suspects a thing.');
     $('win-caught').textContent = caughtCount === 0 ? 'Never caught' : `Caught ${caughtCount}×`;
+    $('win-grade').textContent = grade != null ? `${grade}/20` : '—';
+    $('screen-win').classList.toggle('is-late', !!late);
     this.screen('screen-win', true);
     Input.locked = true;
     await wait(900);

@@ -22,7 +22,9 @@ export const SUSPICION = {
   runMult: 2.4,
   restrictedMult: 4,   // seen near the gates / staff zone without a badge
   crowdMult: 0.15,     // hidden among ≥ CROWD_MIN students
-  badgeMult: 0.35,     // you hold a (borrowed) badge — you look legit
+  badgeMult: 0.7,      // a borrowed badge calms GUARDS a little (teachers/cameras ignore it)
+  badgePhotoSpike: 28, // badging in while a guard watches: they check the photo
+  cameraCatch: 0.35,   // seconds a CCTV needs a clear look at you → caught
   decay: 7,            // per second when nobody sees you
   tailgateSpike: 55,   // slipping through an open gate while watched
   tailgateCrowdSpike: 8,

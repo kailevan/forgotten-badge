@@ -339,7 +339,12 @@ export class Level extends Phaser.Scene {
       }
       const rp = rel(p);
       if (p.hasBadge && Math.abs(rp.across) < 10 && Math.abs(rp.along) < 20) {
-        if (!g.open) this.sfx('beep');
+        if (!g.open) {
+          this.sfx('beep');
+          // it's still someone else's badge: whoever's watching takes a look at the photo
+          const looking = this.watchers.find((w) => w.role === 'guard' && this.watcherSees(w));
+          if (looking && !this.inCrowd()) { this.suspicion += SUSPICION.badgePhotoSpike; this.lastSeenBy = looking; HUD.toast(`${looking.name} glances at the photo… “Camille?”`, 2400); }
+        }
         this.openGate(g, GATE_OPEN_MS, true);
       }
       if (g.open && time > g.until) { g.open = false; g.badge = false; g.img.setTexture('gate-closed'); }
@@ -408,7 +413,7 @@ export class Level extends Phaser.Scene {
     const p = this.player;
     const crowd = this.inCrowd();
     const restricted = this.inRestricted() && !p.hasBadge;
-    let best = 0, others = 0, bestW = null;
+    let best = 0, others = 0, bestW = null, camCaught = null;
     for (const w of this.watchers) {
       const s = this.watcherSees(w);
       w.seesPlayer = s;
@@ -419,12 +424,19 @@ export class Level extends Phaser.Scene {
         if (p.running) r *= SUSPICION.runMult;
         if (restricted) r *= SUSPICION.restrictedMult;
         if (crowd) r *= SUSPICION.crowdMult;
-        if (p.hasBadge) r *= SUSPICION.badgeMult;
+        // a borrowed badge only fools guards from a distance — teachers and cameras aren't fooled
+        if (p.hasBadge && w.role === 'guard') r *= SUSPICION.badgeMult;
         if (!restricted && !p.running && !w.strict) r *= 0.35; // just standing on a public street is barely suspicious
+        // CCTV: if a camera gets a clear look at you (no crowd to hide in), you're caught almost instantly
+        if (w.role === 'camera' && !crowd) {
+          w.camT = (w.camT || 0) + dt;
+          if (w.camT >= SUSPICION.cameraCatch) camCaught = w;
+        }
         if (r > best) { others += best; best = r; bestW = w; } else others += r;
-      }
+      } else if (w.role === 'camera') w.camT = 0;
     }
-    if (bestW) { this.suspicion += (best + others * 0.3) * dt; this.lastSeenBy = bestW; }
+    if (camCaught) { this.suspicion = SUSPICION.caughtAt; this.lastSeenBy = camCaught; bestW = camCaught; }
+    else if (bestW) { this.suspicion += (best + others * 0.3) * dt; this.lastSeenBy = bestW; }
     else this.suspicion -= SUSPICION.decay * dt;
     this.suspicion = Math.max(0, this.suspicion);
     HUD.setSuspicion(this.suspicion);
@@ -435,7 +447,9 @@ export class Level extends Phaser.Scene {
         w.alert = this.suspicion >= SUSPICION.alertAt ? 2 : 1;
         w.faceToward(p.x, p.y);
         if (w.memory) w.memorized = true;
-        if (w.alert === 2 && w.canChase !== false && !w.chasing) this.startChase(w);
+        // security tails you as soon as they're suspicious ("?"); teachers only come at you on "!"
+        const tail = w.role === 'guard' && w.alert >= 1;
+        if ((w.alert === 2 || tail) && w.canChase !== false && !w.chasing) this.startChase(w);
       } else if (!w.seesPlayer && time - (w.lastSaw || 0) > 2500) {
         w.alert = 0;
         if (w.chasing) this.endChase(w);
@@ -453,6 +467,7 @@ export class Level extends Phaser.Scene {
 
   startChase(w) {
     w.chasing = true; w.trail = [{ x: w.x, y: w.y }];
+    w.tailDist = w.role === 'guard' ? 38 : 0;            // security keeps you in sight from a few metres back
     w.savedMode = { mode: w.mode, points: w.points, idx: w.idx };
     this.sfx('alert');
   }
@@ -472,11 +487,11 @@ export class Level extends Phaser.Scene {
     this.cameras.main.shake(180, 0.004);
     const line = w?.caughtLines ? Phaser.Utils.Array.GetRandom(w.caughtLines) : 'Badge, please.';
     await HUD.caught({ who: w?.name || 'Security', line });
-    // checkpoint = start of this level; the clock keeps the time lost
+    // no checkpoints: caught anywhere = back on the pavement in front of the school, progress lost
     this.registry.set('clock', this.registry.get('clock') + 90);
-    this.flags.badge = this.def.keepBadgeOnCatch ? this.flags.badge : this.flags.badgeAtLevelStart;
+    Object.assign(this.flags, { badge: false, texted: false, pastGates: false, inside: false });
     this.cameras.main.fadeOut(300, 20, 19, 26);
-    this.time.delayedCall(320, () => this.scene.restart({ level: this.levelKey, entry: this.entry || this.def.retryEntry }));
+    this.time.delayedCall(320, () => this.scene.restart({ level: 'quai', entry: 'retry' }));
   }
 
   updateInteract() {

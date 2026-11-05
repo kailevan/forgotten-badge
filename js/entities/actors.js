@@ -34,7 +34,7 @@ class Actor extends Phaser.GameObjects.Container {
 
 export class Player extends Actor {
   constructor(scene, x, y, look) {
-    super(scene, x, y, 'player', look);
+    super(scene, x, y, look.spriteKey || 'player', look);
     this.ring = scene.add.image(0, 0, 'ring').setAlpha(0.75);
     this.addAt(this.ring, 0);
     scene.physics.add.existing(this);
@@ -120,7 +120,10 @@ export class NPC extends Actor {
     if (this.dead) return;
     let tx = null, ty = null, sp = this.speed;
     if (this.chasing && this.chaseTarget) {
-      tx = this.chaseTarget.x; ty = this.chaseTarget.y; sp = this.speed * 1.35;
+      const d = Math.hypot(this.chaseTarget.x - this.x, this.chaseTarget.y - this.y);
+      sp = Math.max(this.speed * 1.35, this.tailDist ? 56 : 0);
+      if (d > (this.tailDist || 0)) { tx = this.chaseTarget.x; ty = this.chaseTarget.y; }
+      else this.faceToward(this.chaseTarget.x, this.chaseTarget.y);
     } else if (this.mode === 'patrol' || this.mode === 'route') {
       if (now >= this.waitUntil && this.points.length) {
         const p = this.points[this.idx];

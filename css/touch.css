@@ -20,7 +20,7 @@ body.is-touch #touch { display: block; position: fixed; inset: 0; pointer-events
 }
 .tbtn.is-pressed { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.45); }
 .tbtn--act { width: 76px; height: 76px; font-size: 24px; background: var(--red); color: var(--paper); }
-.tbtn--run { width: 58px; height: 58px; font-size: 12px; margin-bottom: 40px; }
+.tbtn--run { display: none; }
 .tbtn--phone {
   position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: 128px; width: 46px; height: 46px; border-radius: 10px;
   background: var(--ink); box-shadow: inset 0 0 0 3px #3a3943, 0 3px 0 rgba(0,0,0,.4);
