@@ -1,0 +1,79 @@
+/* ── Tokens ─────────────────────────────────────────────── */
+:root {
+  --ink: #1b1a22;
+  --void: #14131a;
+  --paper: #f4f1ea;
+  --paper-2: #e6e1d5;
+  --red: #d6332e;
+  --amber: #f2b134;
+  --green: #7fbf3f;
+  --mute: #8b8a92;
+  --px: max(2px, 0.42cqw);            /* one "art pixel" at current scale */
+  --font-ui: 'Silkscreen', monospace;
+  --font-text: 'Pixelify Sans', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--void); color: var(--paper); overflow: hidden; }
+body {
+  font-family: var(--font-text);
+  -webkit-font-smoothing: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; user-select: none;
+  touch-action: none;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+#app { position: fixed; inset: 0; display: grid; place-items: center; }
+
+/* 16:9 stage, as large as the screen allows */
+#stage {
+  position: relative;
+  width: min(100vw, calc(100dvh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  container-type: size;
+  overflow: hidden;
+  background: var(--void);
+}
+#game, #game canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+#game canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+/* pixel-step border used across UI */
+.px-frame {
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--ink), 0 var(--px) 0 0 var(--ink),
+    calc(var(--px) * -1) 0 0 0 var(--ink), var(--px) 0 0 0 var(--ink);
+}
+
+.only-touch { display: none; }
+body.is-touch .only-touch { display: block; }
+body.is-touch .only-desk { display: none; }
+
+#rotate { display: none; }
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotate {
+    position: fixed; inset: 0; z-index: 99; display: grid; place-content: center; gap: 20px;
+    background: var(--void); text-align: center; font-family: var(--font-ui); font-size: 14px; letter-spacing: .06em;
+  }
+  .rotate-phone {
+    width: 34px; height: 58px; margin: 0 auto; border: 4px solid var(--paper); border-radius: 6px;
+    animation: rot 2.4s steps(1) infinite;
+  }
+  @keyframes rot { 0%, 40% { transform: rotate(0); } 50%, 90% { transform: rotate(-90deg); } }
+}
+
+/* ── plan viewer ── */
+body.is-plan #stage { width: 100vw; height: calc(100dvh - 48px); aspect-ratio: auto; margin-top: 48px; }
+body.is-plan #app { place-items: start; }
+body.is-plan #touch, body.is-plan #rotate { display: none !important; }
+#plan-bar {
+  position: fixed; left: 0; right: 0; top: 0; height: 48px; z-index: 50; display: flex; align-items: center; gap: 14px; padding: 0 14px;
+  background: #1b1a22; border-bottom: 1px solid #3a3943; font: 600 14px/1 var(--font-text); color: var(--paper);
+}
+#plan-bar strong { font: 700 12px/1 var(--font-ui); letter-spacing: .1em; color: #ffd75e; }
+#plan-bar a, #plan-bar button { color: var(--paper); text-decoration: none; background: #2a2932; padding: 7px 11px; border-radius: 3px; font: inherit; }
+#plan-bar a.is-on { background: var(--paper); color: var(--ink); }
+#plan-bar a.play { margin-left: auto; background: var(--red); }
+#plan-bar label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+#plan-bar .sep { width: 1px; height: 22px; background: #3a3943; }
+#plan-bar .hint { color: var(--mute); font-size: 13px; }

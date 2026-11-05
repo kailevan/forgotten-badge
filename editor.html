@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Map Editor — Forgotten Badge</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 fill=%22%231b1a22%22/%3E%3Crect x=%223%22 y=%223%22 width=%224%22 height=%224%22 fill=%22%23d6332e%22/%3E%3Crect x=%229%22 y=%229%22 width=%224%22 height=%224%22 fill=%22%23f4f1ea%22/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="brand">MAP EDITOR</div>
+    <label class="field">Map
+      <select id="level">
+        <option value="quai">Outside + ground floor</option>
+        <option value="first">IFM — 1st floor</option>
+      </select>
+    </label>
+    <div class="tools" id="tools">
+      <button data-tool="brush" class="is-on" title="Brush (B)">✎ Brush</button>
+      <button data-tool="rect" title="Rectangle (R)">▭ Rect</button>
+      <button data-tool="line" title="Line (L)">╱ Line</button>
+      <button data-tool="fill" title="Fill area (F)">◩ Fill</button>
+      <button data-tool="pick" title="Pick a tile from the map (I)">⌖ Pick</button>
+      <button data-tool="move" title="Move / scale the reference image (M)">✥ Image</button>
+    </div>
+    <div class="group">
+      <button id="undo" title="Undo (Ctrl+Z)">↶</button>
+      <button id="redo" title="Redo (Ctrl+Shift+Z)">↷</button>
+      <button id="zoom-out" title="Zoom out">−</button>
+      <span id="zoom-label">24px</span>
+      <button id="zoom-in" title="Zoom in">+</button>
+    </div>
+    <div class="group right">
+      <span id="status" class="status">Not saved yet</span>
+      <button id="play" class="ghost" title="Open this map in the game">▶ Try it</button>
+      <button id="save" class="primary" title="Save (Ctrl+S)">Save</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel" id="palette"></aside>
+
+    <section class="canvas-wrap" id="wrap">
+      <div class="stage" id="stage">
+        <img id="ref" alt="">
+        <canvas id="map"></canvas>
+        <canvas id="overlay"></canvas>
+      </div>
+      <div class="drop" id="drop">Drop a photo or floor plan here to trace over it</div>
+    </section>
+
+    <aside class="panel side">
+      <h3>Reference image</h3>
+      <p class="hint">Drop an image anywhere (a floor plan, an evacuation plan, a Google Maps screenshot) and trace it.</p>
+      <label class="btnlike">Choose image…<input type="file" id="ref-file" accept="image/png,image/jpeg"></label>
+      <label class="slider">Image opacity <input type="range" id="ref-opacity" min="0" max="100" value="55"></label>
+      <label class="slider">Image size <input type="range" id="ref-scale" min="10" max="400" value="100"></label>
+      <label class="slider">Tiles opacity <input type="range" id="tile-opacity" min="0" max="100" value="85"></label>
+      <label class="check"><input type="checkbox" id="grid-on" checked> Show grid</label>
+      <button id="ref-clear" class="ghost small">Remove image</button>
+
+      <h3>Map size</h3>
+      <div class="size">
+        <label>W <input type="number" id="w" min="10" max="300"></label>
+        <label>H <input type="number" id="h" min="10" max="200"></label>
+        <button id="resize" class="ghost small">Apply</button>
+      </div>
+      <p class="hint">1 square ≈ 1–1.5 m. A character is about one square wide.</p>
+
+      <h3>Brush size</h3>
+      <div class="sizes" id="brush-sizes">
+        <button data-size="1" class="is-on">1</button><button data-size="2">2</button><button data-size="3">3</button><button data-size="5">5</button>
+      </div>
+
+      <h3>Under the cursor</h3>
+      <p id="hover" class="hover">—</p>
+
+      <h3>How to</h3>
+      <ul class="howto">
+        <li><b>Left-drag</b> paints · <b>right-drag</b> erases</li>
+        <li><b>Shift + drag</b> = rectangle</li>
+        <li><b>Space + drag</b> or the middle mouse button pans · <b>Ctrl + scroll</b> zooms</li>
+        <li><b>Markers</b> (bottom of the list): place where things are, like the start, stairs, guards and notes</li>
+        <li>Hit <b>Save</b>, then tell Claude the map is ready</li>
+      </ul>
+    </aside>
+  </main>
+
+  <script src="js/vendor/phaser.min.js"></script>
+  <script type="module" src="js/editor/editor.js"></script>
+</body>
+</html>

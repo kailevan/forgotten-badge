@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#14131a">
+  <title>Forgotten Badge — IFM 40</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 fill=%22%23d6332e%22/%3E%3Crect x=%223%22 y=%225%22 width=%2210%22 height=%226%22 fill=%22%23f4f1ea%22/%3E%3C/svg%3E">
+  <meta name="description" content="Late for class, badge at home. Sneak into IFM room 1.11 before Edusign closes. Made for IFM’s 40th anniversary.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/hud.css">
+  <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/touch.css">
+</head>
+<body>
+  <main id="app">
+    <div id="stage">
+      <div id="game"></div>
+
+      <!-- ── In-game HUD ── -->
+      <div id="hud">
+        <div class="hud-tl">
+          <div id="meter" data-level="low">
+            <span class="meter-label">Suspicion</span>
+            <span class="meter-bar"><span id="sus-fill"></span></span>
+          </div>
+          <div id="objective"><span class="obj-dot"></span><span id="objective-text"></span></div>
+        </div>
+        <div class="hud-tr">
+          <span id="clock">09:07</span>
+          <span id="badge-chip" class="chip">Badge</span>
+          <span id="hidden-chip" class="chip">Hidden</span>
+        </div>
+        <aside id="ways" onclick="this.classList.toggle('is-min')"><h4><span id="ways-title">Ways in</span><em class="only-desk">H</em></h4><ol id="ways-list"></ol></aside>
+        <div id="prompt"><span></span></div>
+        <div id="toast"></div>
+      </div>
+
+      <!-- ── Cinematic ── -->
+      <div class="bar bar--top"></div>
+      <div class="bar bar--bottom"></div>
+      <div id="caption"></div>
+      <button id="skip" onclick="window.__input && window.__input.press('back')">Skip <span class="only-desk">· Esc</span></button>
+      <div id="card"></div>
+
+      <!-- ── Dialogue ── -->
+      <div id="dialogue" onclick="window.__advance && window.__advance()">
+        <div id="dlg-name"></div>
+        <div id="dlg-text"></div>
+        <div class="dlg-next"><span class="only-desk">E</span><span class="only-touch">tap</span> ▶</div>
+      </div>
+
+      <!-- ── Phone ── -->
+      <div id="phone">
+        <div class="phone-top"><span>Inès</span><button id="phone-close" aria-label="Close">×</button></div>
+        <div id="phone-msgs"></div>
+        <div id="phone-choices"></div>
+      </div>
+
+      <!-- ── Title: the badge you forgot ── -->
+      <section id="screen-title" class="screen">
+        <div class="idcard">
+          <div class="idcard-head">
+            <span class="idcard-logo">IFM</span>
+            <span class="idcard-school">Institut Français<br>de la Mode</span>
+            <span class="idcard-40">40</span>
+          </div>
+          <div class="idcard-body">
+            <div class="idcard-photo"><span>?</span></div>
+            <div class="idcard-info">
+              <span class="idcard-kicker">Carte étudiant · 2026–2027</span>
+              <h1>Forgotten<br>Badge</h1>
+              <span class="idcard-meta">1986 — 2026 · 40 ans</span>
+            </div>
+          </div>
+          <div class="idcard-strip"></div>
+        </div>
+        <p class="title-blurb">You’re late for class in <b>room&nbsp;1.11</b>. Edusign closes at <b>9:30</b>.<br>And your student badge? On your desk. At home.</p>
+        <button id="title-start" class="btn btn--start">Press start</button>
+        <p class="title-controls only-desk">WASD / arrows move · Shift run · E act · P phone</p>
+        <p class="title-controls only-touch">Joystick move · RUN · A act · phone</p>
+      </section>
+
+      <!-- ── Caught ── -->
+      <section id="screen-caught" class="screen">
+        <div class="caught-stamp">Caught</div>
+        <p class="caught-who" id="caught-who"></p>
+        <p class="caught-line" id="caught-line"></p>
+        <button id="caught-retry" class="btn">Try again</button>
+      </section>
+
+      <!-- ── Win ── -->
+      <section id="screen-win" class="screen">
+        <span class="win-kicker">Room 1.11</span>
+        <h2>You made it.</h2>
+        <p id="win-note"></p>
+        <div class="win-stats"><span>Arrived <b id="win-time"></b></span><span id="win-caught"></span></div>
+        <p class="win-sign">Happy 40th, IFM · 1986 — 2026</p>
+        <button id="win-again" class="btn">Play again</button>
+      </section>
+    </div>
+
+    <!-- ── Touch controls (phones only) ── -->
+    <div id="touch">
+      <div id="stick"><div id="stick-knob"></div></div>
+      <div class="touch-btns">
+        <button id="btn-run" class="tbtn tbtn--run">Run</button>
+        <button id="btn-act" class="tbtn tbtn--act">A</button>
+      </div>
+      <button id="btn-phone" class="tbtn tbtn--phone" aria-label="Phone"><i></i></button>
+    </div>
+
+    <div id="rotate"><div class="rotate-phone"></div><p>Turn your phone sideways</p></div>
+  </main>
+
+  <script src="js/vendor/phaser.min.js"></script>
+  <script type="module">
+    import { HUD } from './js/ui/hud.js';
+    window.__advance = () => HUD.advance();
+  </script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

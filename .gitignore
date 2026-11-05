@@ -1,0 +1,7 @@
+.playwright-mcp/
+.DS_Store
+# reference photos (architects' / press images) — for research only, never published
+research/images/
+# local drawings + editor saves
+sketches/
+maps/
