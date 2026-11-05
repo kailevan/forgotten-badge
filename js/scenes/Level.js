@@ -420,7 +420,7 @@ export class Level extends Phaser.Scene {
       if (s) {
         w.lastSaw = time;
         w.everSaw = true;
-        let r = SUSPICION.baseRate * w.watchMult * (w.memory && w.memorized ? 1.7 : 1);
+        let r = SUSPICION.baseRate * w.watchMult * (w.memory && w.memorized ? 1.7 : 1) * (this.def.alertness || 1);
         if (p.running) r *= SUSPICION.runMult;
         if (restricted) r *= SUSPICION.restrictedMult;
         if (crowd) r *= SUSPICION.crowdMult;
@@ -437,7 +437,7 @@ export class Level extends Phaser.Scene {
     }
     if (camCaught) { this.suspicion = SUSPICION.caughtAt; this.lastSeenBy = camCaught; bestW = camCaught; }
     else if (bestW) { this.suspicion += (best + others * 0.3) * dt; this.lastSeenBy = bestW; }
-    else this.suspicion -= SUSPICION.decay * dt;
+    else this.suspicion -= (this.def.decay ?? SUSPICION.decay) * dt;
     this.suspicion = Math.max(0, this.suspicion);
     HUD.setSuspicion(this.suspicion);
     HUD.setSeen(!!bestW);

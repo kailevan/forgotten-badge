@@ -89,6 +89,9 @@ g.rect(111, 3, 17, 27, '#');
 export default {
   name: 'First floor',
   rows: g.rows(),
+  // upstairs, class has started: anyone in a corridor without a reason stands out
+  alertness: 2.5,
+  decay: 4,
   spawn: { x: 100, y: 20, dir: 1 },
   entries: { stairs: { x: 100, y: 20, dir: 1 } },
   exits: [{ x: 12, y: 10.6, w: 1, label: '★ 1.11 · EDUSIGN', icon: 'arrow-star', color: '#f4f1ea' }, { x: 86, y: 17.4, w: 2, label: '▼ GROUND FLOOR', color: '#f4f1ea' }],
@@ -118,8 +121,8 @@ export default {
       points: [tilePt(68, 12, { wait: 1200, look: 3 }), tilePt(40, 12, { wait: 900, look: 0 }), tilePt(20, 12, { wait: 2600, look: 2 }), tilePt(44, 13, { wait: 900, look: 1 }), tilePt(68, 13, { wait: 1200, look: 3 })],
       caughtLines: ['Shouldn’t you be in class? Where’s your badge?', 'Funny. Your badge says Camille.', 'Not today. Downstairs, reception.'] });
     // the hall monitor walks the south corridor — the other way round isn't free either
-    L.npc({ key: 'guard', look: LOOKS.guard, role: 'guard', name: 'Surveillant', mode: 'patrol', speed: 26, strict: true, ...tilePt(64, 31),
-      vision: { range: 112, fov: 1.3 },
+    L.npc({ key: 'guard', look: LOOKS.guard, role: 'guard', name: 'Surveillant', mode: 'patrol', speed: 32, strict: true, ...tilePt(64, 31),
+      vision: { range: 140, fov: 1.6 }, bump: 30,
       points: [tilePt(64, 31, { wait: 2000, look: 2 }), tilePt(24, 31, { wait: 2400, look: 3 }), tilePt(24, 30, { wait: 1200, look: 1 })],
       caughtLines: ['Corridors aren’t for loitering. Badge?'] });
     // admin staff walking the cross corridor between the offices
